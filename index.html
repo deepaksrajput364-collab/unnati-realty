@@ -251,6 +251,105 @@ renderProperties(properties);
 </script>
 
 </body>
+  <script>
+/* REALYNK DELETE FIX */
+(function () {
+  'use strict';
+
+  function getProperties() {
+    try {
+      var p = JSON.parse(localStorage.getItem('realynkProperties') || '[]');
+      return Array.isArray(p) ? p : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveProperties(p) {
+    localStorage.setItem('realynkProperties', JSON.stringify(p));
+  }
+
+  function findCard(button) {
+    return button.closest('.property') ||
+           button.closest('[data-realynk-id]') ||
+           button.closest('.panel');
+  }
+
+  function deleteProperty(button) {
+    var card = findCard(button);
+    if (!card) {
+      alert('Property card nahi mila.');
+      return;
+    }
+
+    var id = card.getAttribute('data-realynk-id') ||
+             card.dataset.realynkId;
+
+    if (!id) {
+      alert('Property ID nahi mila.');
+      return;
+    }
+
+    var properties = getProperties();
+
+    var updated = properties.filter(function (p) {
+      return String(p.id) !== String(id);
+    });
+
+    saveProperties(updated);
+
+    try {
+      var deleted = JSON.parse(
+        localStorage.getItem('realynkDeletedIds') || '[]'
+      );
+
+      if (!Array.isArray(deleted)) deleted = [];
+
+      if (deleted.indexOf(String(id)) === -1) {
+        deleted.push(String(id));
+      }
+
+      localStorage.setItem(
+        'realynkDeletedIds',
+        JSON.stringify(deleted)
+      );
+    } catch (e) {}
+
+    card.remove();
+
+    if (typeof toast === 'function') {
+      toast('Property deleted successfully');
+    } else {
+      alert('Property deleted successfully');
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var button = e.target.closest &&
+                 e.target.closest('button');
+
+    if (!button) return;
+
+    var text = (button.textContent || '')
+      .trim()
+      .toLowerCase();
+
+    if (text !== 'delete' && text.indexOf('delete') !== 0) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.stopImmediatePropagation) {
+      e.stopImmediatePropagation();
+    }
+
+    deleteProperty(button);
+  }, true);
+
+})();
+</script>
 </html>
 
 
