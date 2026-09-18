@@ -1,1 +1,503 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
+<title>ReaLynk — Broker Network Invitation</title>
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ReaLynk — Broker Network Invitation">
+<meta property="og:description" content="Join the ReaLynk Broker Network. Connect, share properties and grow your real-estate network.">
+<meta property="og:image" content="https://unnatient.co.in/ReaLynk%20Poster%20for%20link.png?v=5">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ReaLynk — Broker Network Invitation">
+<meta name="twitter:description" content="Join the ReaLynk Broker Network.">
+<meta name="twitter:image" content="https://unnatient.co.in/ReaLynk%20Poster%20for%20link.png?v=5">
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f3f6fa;
+  color:#17324d;
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.top{
+  background:#0b3768;
+  color:white;
+  text-align:center;
+  padding:14px 10px;
+  font-size:14px;
+  font-weight:bold;
+  letter-spacing:.4px;
+}
+
+.wrap{
+  max-width:650px;
+  margin:30px auto;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:28px 22px;
+  box-shadow:0 10px 35px rgba(0,0,0,.12);
+  text-align:center;
+}
+
+.logo{
+  width:120px;
+  height:auto;
+  max-width:45%;
+  object-fit:contain;
+  margin:0 auto 12px;
+  display:block;
+}
+
+h1{
+  margin:8px 0 14px;
+  color:#0b3768;
+  font-size:28px;
+}
+
+p{
+  line-height:1.6;
+}
+
+.muted{
+  color:#66788a;
+}
+
+.btn{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:15px;
+  margin-top:10px;
+  background:#0b3768;
+  color:#fff;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn:hover{
+  opacity:.92;
+}
+
+.form{
+  display:none;
+  text-align:left;
+  margin-top:20px;
+}
+
+label{
+  display:block;
+  margin-top:12px;
+  margin-bottom:5px;
+  font-weight:bold;
+  font-size:14px;
+}
+
+input{
+  width:100%;
+  padding:13px;
+  border:1px solid #ccd6e0;
+  border-radius:10px;
+  font-size:16px;
+  outline:none;
+}
+
+input:focus{
+  border-color:#0b3768;
+}
+
+.status{
+  display:none;
+  padding:13px;
+  border-radius:10px;
+  margin:15px 0;
+  line-height:1.5;
+  font-size:14px;
+}
+
+.small{
+  font-size:12px;
+  color:#7a8794;
+  margin-top:18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  REALYNK • REAL ESTATE AGENT NETWORK
+</div>
+
+<div class="wrap">
+  <div class="card">
+
+    <img class="logo" src="./logo.png" alt="ReaLynk Logo">
+
+    <h1>🤝 ReaLynk Broker Network</h1>
+
+    <p id="intro">
+      Aapko ReaLynk Broker Network mein join hone ke liye invite kiya gaya hai.
+    </p>
+
+    <p class="muted">
+      Connect with brokers, share properties aur apna real-estate network grow karein.
+    </p>
+
+    <div id="status" class="status"></div>
+
+    <button id="accept" class="btn">
+      ✓ Accept & Join ReaLynk
+    </button>
+
+    <div id="form" class="form">
+
+      <label>Full Name</label>
+      <input id="name" type="text" placeholder="Apna naam">
+
+      <label>Mobile Number</label>
+      <input id="phone" type="tel" placeholder="Mobile number">
+
+      <label>Company / Agency</label>
+      <input id="company" type="text" placeholder="Company ya Agency">
+
+      <label>City</label>
+      <input id="city" type="text" placeholder="City">
+
+      <label>Areas Served</label>
+      <input id="areas" type="text" placeholder="Jaise Mira Road, Bhayandar">
+
+      <label>Experience</label>
+      <input id="experience" type="text" placeholder="Jaise 5 Years">
+
+      <button id="submit" class="btn">
+        Submit for Verification
+      </button>
+
+    </div>
+
+    <p class="small">
+      Profile verification ReaLynk Admin ke dwara complete ki jayegi.
+    </p>
+
+  </div>
+</div>
+
+<script type="module">
+
+import {
+  getApps,
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  setDoc,
+  addDoc,
+  collection,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+import { firebaseConfig } from "./firebase-config.js";
+
+const app = getApps().length
+  ? getApps()[0]
+  : initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const params = new URLSearchParams(window.location.search);
+const invitationId = params.get("id");
+
+const $ = id => document.getElementById(id);
+
+let invitation = null;
+let currentUser = null;
+
+function showStatus(message, success=false){
+
+  const box = $("status");
+
+  box.textContent = message;
+  box.style.display = "block";
+
+  if(success){
+    box.style.background = "#e9f8ef";
+    box.style.color = "#18864b";
+  }else{
+    box.style.background = "#fff1f0";
+    box.style.color = "#b42318";
+  }
+}
+
+async function loadInvitation(){
+
+  if(!invitationId){
+
+    showStatus("Invitation ID missing hai.");
+
+    $("accept").style.display = "none";
+
+    return;
+  }
+
+  try{
+
+    const ref = doc(
+      db,
+      "brokerInvitations",
+      invitationId
+    );
+
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()){
+
+      showStatus("Invitation link nahi mila.");
+
+      $("accept").style.display = "none";
+
+      return;
+    }
+
+    invitation = {
+      id:snap.id,
+      ...snap.data()
+    };
+
+    $("intro").textContent =
+      "Namaste " +
+      (invitation.name || "Broker") +
+      ", aapko ReaLynk Broker Network mein invite kiya gaya hai.";
+
+    $("name").value =
+      invitation.name || "";
+
+    $("phone").value =
+      invitation.phone || "";
+
+    $("company").value =
+      invitation.company || "";
+
+    $("city").value =
+      invitation.city || "";
+
+    $("areas").value =
+      invitation.areas || "";
+
+    $("experience").value =
+      invitation.experience || "";
+
+  }catch(error){
+
+    console.error(error);
+
+    showStatus(
+      "Invitation load nahi ho paaya. Please try again."
+    );
+  }
+}
+
+$("accept").addEventListener("click", async ()=>{
+
+  try{
+
+    const provider =
+      new GoogleAuthProvider();
+
+    const result =
+      await signInWithPopup(auth, provider);
+
+    currentUser = result.user;
+
+    $("accept").style.display = "none";
+
+    $("form").style.display = "block";
+
+    showStatus(
+      "Google login successful. Ab apni details confirm karke Submit karein.",
+      true
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    showStatus(
+      "Google login cancel ya fail hua."
+    );
+  }
+
+});
+
+$("submit").addEventListener("click", async ()=>{
+
+  if(!currentUser || !invitation){
+
+    showStatus(
+      "Pehle Accept & Join ReaLynk par click karke login karein."
+    );
+
+    return;
+  }
+
+  const fullName =
+    $("name").value.trim();
+
+  const phone =
+    $("phone").value.trim();
+
+  const company =
+    $("company").value.trim();
+
+  const city =
+    $("city").value.trim();
+
+  const areas =
+    $("areas").value.trim();
+
+  const experience =
+    $("experience").value.trim();
+
+  if(!fullName || !phone){
+
+    showStatus(
+      "Full Name aur Mobile Number zaroori hai."
+    );
+
+    return;
+  }
+
+  const button = $("submit");
+
+  button.disabled = true;
+  button.textContent = "Submitting...";
+
+  const data = {
+
+    uid:currentUser.uid,
+
+    fullName:fullName,
+
+    phone:phone,
+
+    companyName:company,
+
+    city:city,
+
+    areas:areas,
+
+    experience:experience,
+
+    email:currentUser.email || "",
+
+    status:"pending",
+
+    approved:false,
+
+    verified:false,
+
+    invitationId:invitation.id,
+
+    submittedAt:serverTimestamp(),
+
+    createdAt:serverTimestamp()
+
+  };
+
+  try{
+
+    const applicationRef =
+      await addDoc(
+        collection(db,"brokerApplications"),
+        data
+      );
+
+    await setDoc(
+      doc(db,"brokers",currentUser.uid),
+      data,
+      {merge:true}
+    );
+
+    await updateDoc(
+      doc(
+        db,
+        "brokerInvitations",
+        invitation.id
+      ),
+      {
+        status:"pending_verification",
+
+        acceptedByUid:
+          currentUser.uid,
+
+        acceptedEmail:
+          currentUser.email || "",
+
+        acceptedAt:
+          serverTimestamp(),
+
+        applicationId:
+          applicationRef.id,
+
+        updatedAt:
+          serverTimestamp()
+      }
+    );
+
+    $("form").style.display = "none";
+
+    showStatus(
+      "🎉 Application successfully submit ho gaya. Admin verification pending hai.",
+      true
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    showStatus(
+      "Application submit nahi hua. Firebase permissions check karein."
+    );
+
+  }finally{
+
+    button.disabled = false;
+
+    button.textContent =
+      "Submit for Verification";
+
+  }
+
+});
+
+loadInvitation();
+
+</script>
+
+</body>
+</html>
